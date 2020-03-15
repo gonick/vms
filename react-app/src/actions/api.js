@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:5000/api/";
+// const baseUrl = "http://localhost:5000/api/";
+const baseUrl = "https://vms-webapi.azurewebsites.net/api/";
 
 export default {
   vehicle(url = baseUrl + 'Vms/') {
