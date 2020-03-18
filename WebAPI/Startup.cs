@@ -40,7 +40,7 @@ namespace WebAPI
         {
 
             app.UseCors(options =>
-            options.WithOrigins("http://localhost:3000")
+            options.WithOrigins("*")
             .AllowAnyHeader()
             .AllowAnyMethod()
             );

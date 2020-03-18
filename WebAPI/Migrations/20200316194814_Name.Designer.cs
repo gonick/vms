@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAPI.Models;
 
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(VmsDbContext))]
-    partial class VmsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200316194814_Name")]
+    partial class Name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,12 +32,10 @@ namespace WebAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DrivingLicenseNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
@@ -44,19 +44,16 @@ namespace WebAPI.Migrations
                         .HasMaxLength(50);
 
                     b.Property<string>("LicenseCountryCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(3)")
                         .HasMaxLength(3);
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
@@ -67,12 +64,14 @@ namespace WebAPI.Migrations
 
                     b.HasIndex("UserName")
                         .IsUnique()
+                        .HasFilter("[UserName] IS NOT NULL")
                         .HasAnnotation("SqlServer:Include", new[] { "Password" });
 
                     b.HasIndex("VehicleId");
 
                     b.HasIndex("DrivingLicenseNumber", "LicenseCountryCode")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[DrivingLicenseNumber] IS NOT NULL AND [LicenseCountryCode] IS NOT NULL");
 
                     b.ToTable("Drivers");
                 });
@@ -94,7 +93,6 @@ namespace WebAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("message")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -132,7 +130,6 @@ namespace WebAPI.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("PlateNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
@@ -153,7 +150,8 @@ namespace WebAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PlateNumber")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[PlateNumber] IS NOT NULL");
 
                     b.ToTable("Vehicles");
                 });

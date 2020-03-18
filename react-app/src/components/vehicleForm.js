@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 // import useForm from "./useForm";
 import { connect } from 'react-redux';
-import { vehicleType } from '../constants';
+import * as constants from '../constants';
 import { useForm } from 'react-hook-form'
 import * as actions from '../actions/vehicle';
 import { useToasts } from "react-toast-notifications";
 
+//default form values
 const initialFieldValues = {
-  licenseNumber: '',
+  plateNumber: '',
   speed: 0,
+  speedType: 0,
   latitude: 0,
   longitude: 0,
-  temperature: 0,
+  engineTemperture: 0,
+  temperatureType: 0,
   type: 0
 }
 
@@ -20,21 +23,29 @@ const VehicleForm = props => {
   const { register, handleSubmit, errors, reset } = useForm({ defaultValues: initialFieldValues, mode: "onBlur" });
   const { addToast } = useToasts()
 
+  //set form data on component mount hook
   useEffect(() => {
     if (props.id !== 0) {
-      reset(props.vehicleList.find(x => x.id === props.id))
+      reset({ ...initialFieldValues, ...props.vehicleList.find(x => x.id === props.id) });
     }
   }, [props.id])
 
+  //loader state for showing 
   const [showLoader, changeLoaderStatus] = useState(false);
 
+  /**
+   * dispatch event to update or create vehicle data after validating
+   */
   const onSubmit = data => {
     changeLoaderStatus(true);
+    
+    //show success message via toast
     const onSuccess = () => {
       addToast("Submitted successfully", { appearance: 'success' });
       changeLoaderStatus(false);
       props.onClose();
     }
+    //case for adding 
     if (props.id === -1)
       props.createVehicle(data, onSuccess)
     else
@@ -45,15 +56,18 @@ const VehicleForm = props => {
   return (
     <form autoComplete="off" noValidate onSubmit={handleSubmit(onSubmit)}>
       <div className="form-group">
-        <label htmlFor="licenseNumber">License Plate:</label>
-        <input type="text" name="licenseNumber"
-          className="form-control" placeholder="Enter License Plate Number" id="licenseNumber" ref={register({ required: { value: true, message: "This field is required" } })} />
-        <span className="error">{errors?.licenseNumber?.message}</span>
+        <label htmlFor="plateNumber">License Plate:</label>
+        <input type="text" name="plateNumber"
+          className="form-control" placeholder="Enter License Plate Number" id="plateNumber" 
+          ref={register({ 
+            required: { value: true, message: "This field is required" },
+            maxLength: { value: 50, message: "License plate number exceeds 50 characters" } })} />
+        <span className="error">{errors?.plateNumber?.message}</span>
       </div>
       <div className="form-group">
         <label htmlFor="type">Vehicle Type:</label>
         <select className="form-control" name="type" ref={register({ required: { value: true, message: "This field is required" } })}>
-          {Object.keys(vehicleType).map(key => (<option key={key} value={key}>{vehicleType[key]}</option>))}
+          {Object.keys(constants.vehicleType).map(key => (<option key={key} value={key}>{constants.vehicleType[key]}</option>))}
         </select>
         <span className="error">{errors?.type?.message}</span>
       </div>
@@ -64,19 +78,36 @@ const VehicleForm = props => {
             placeholder="Enter Speed" id="speed"
             ref={register({
               required: { value: true, message: "This field is required" },
-              min: { value: 0, message: "Speed should be a positive number" }
+              min: { value: 0, message: "Speed should be a positive number" },
+              max: { value: 500, message: "Speed cannot be greater that 500" }
             })} />
-        &nbsp; kmph
+        &nbsp;
+        <select name="speedType" ref={register()} className="form-control">
+            {Object.keys(constants.speedType).map(key => {
+              return (<option key={key} value={key}>{constants.speedType[key]}</option>)
+            })}
+        </select>
         </div>
         <span className="error">{errors?.speed?.message}</span>
       </div>
       <div className="form-group">
-        <label htmlFor="temperature">Engine Temperature:</label>
+        <label htmlFor="engineTemperture">Engine Temperature:</label>
         <div className="form-inline">
-          <input type="number" name="temperature"
-            className="form-control" placeholder="Enter Engine Temperate" id="temperature" ref={register({ required: { value: true, message: "This field is required" } })} /> &nbsp; &#176;C
+          <input type="number" name="engineTemperture"
+            className="form-control" placeholder="Enter Engine Temperate" id="engineTemperture" 
+            ref={register({ 
+              required: { value: true, message: "This field is required" },
+              min: { value: -100, message: "Engine Temperature cannot be below -100" },
+              max: { value: 2000, message: "Engine Temperature cannot be more than 2000" }
+               })} />
+          &nbsp;
+            <select name="temperatureType" ref={register()} className="form-control">
+            {Object.keys(constants.temperatureType).map(key => {
+              return (<option key={key} value={key}>{constants.temperatureType[key]}</option>)
+            })}
+          </select>
         </div>
-        <span className="error">{errors?.temperature?.message}</span>
+        <span className="error">{errors?.engineTemperture?.message}</span>
       </div>
       <div className="form-group">
         <label >Location: (Latitude , Longitude)</label>
@@ -103,7 +134,7 @@ const VehicleForm = props => {
       <div className="modal-footer">
         <button type="submit" className="btn btn-primary" data-dismiss="modal" disabled={showLoader}>
           Save
-        {showLoader?<span className="btn-loader"></span>:''}
+        {showLoader ? <span className="btn-loader"></span> : ''}
         </button> &nbsp;
         <input type="button" className="btn btn-danger" data-dismiss="modal" onClick={props.onClose} value="Close" />
       </div>

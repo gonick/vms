@@ -2,7 +2,8 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using NetTopologySuite.Geometries;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WebAPI.Models
 {
@@ -11,37 +12,50 @@ namespace WebAPI.Models
         Truck,
         Van
     }
-    public class BaseEntity
-    {
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-    }
 
 
     public class Vehicle : BaseEntity
     {
+        internal string _connectionDetails { get; set; }
+
         [Key]
+        [Required]
         public int Id { get; set; }
 
+        [Required]
         public VehicleType Type { get; set; }
 
-        [Column(TypeName = "nvarchar(15)")]
-        public string LicenseNumber { get; set; }
+        [MaxLength(50)]
+        [Required]
+        public string PlateNumber { get; set; }
 
+        [Column(name: "CurrentSpeed")]
         public float Speed { get; set; } //in kmph
 
+        [Column(name: "CurrentLatitude")]
         public double Latitude { get; set; }
 
+        [Column(name: "CurrentLongitude")]
         public double Longitude { get; set; }
 
-
-        public float Temperature { get; set; } //in celcius
+        [Column(name:"CurrentEngineTemperature")]
+        public float EngineTemperture { get; set; } //in celcius
 
         [DefaultValue("false")]
-        public bool isDeleted { get; set; }
+        public bool IsDeleted { get; set; }
+
+        [NotMapped]
+        public JObject ConnectionDetails
+        {
+            get
+            {
+                return JsonConvert.DeserializeObject<JObject>(string.IsNullOrEmpty(_connectionDetails) ? "{}" : _connectionDetails);
+            }
+            set
+            {
+                _connectionDetails = JsonConvert.SerializeObject(value);
+            }
+        }
 
     }
 }
-//assumptions:
-// all data is collected form a central unit
-// and alll vehicles emit these info

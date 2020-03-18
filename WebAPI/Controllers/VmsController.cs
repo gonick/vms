@@ -25,14 +25,14 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
-            return await _context.Vehicles.Where(x => x.isDeleted == false).OrderByDescending(x=>x.UpdatedAt).ToListAsync();
+            return await _context.Vehicles.Where(x => x.IsDeleted == false).OrderByDescending(x=>x.UpdatedAt).ToListAsync();
         }
 
         // GET api/Vms/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            return await _context.Vehicles.FirstOrDefaultAsync(x => x.Id == id && x.isDeleted == false);
+            return await _context.Vehicles.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
         }
 
         // POST api/Vms
@@ -82,8 +82,8 @@ namespace WebAPI.Controllers
             //_context.Vehicles.Remove(vehicle);
 
             //instead doing soft delete
-            vehicle.isDeleted = true;
-            _context.Entry(vehicle).Property(x => x.isDeleted).IsModified = true;
+            vehicle.IsDeleted = true;
+            _context.Entry(vehicle).Property(x => x.IsDeleted).IsModified = true;
             await _context.SaveChangesAsync();
 
             return vehicle;

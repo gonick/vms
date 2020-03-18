@@ -1,5 +1,5 @@
 import api from './api';
-
+import * as constants from '../constants';
 export const ACTION_TYPES = {
   CREATE: "CREATE",
   UPDATE: "UPDATE",
@@ -7,10 +7,21 @@ export const ACTION_TYPES = {
   FETCH_ALL: "FETCH_ALL"
 }
 
-const formateData = (data)=>{
+//convert to required datatype
+const formatData = (data)=>{
+  if (data.temperatureType == 1) {
+    data.engineTemperture = constants.fahrenheitToCelcius(data.engineTemperture);
+    delete data.temperatureType;
+  }
+
+  if (data.speedType == 1) {
+    data.speed = constants.mphToKmph(data.speed);
+    delete data.speedType;
+  }
+  data.plateNumber = data.plateNumber.trim();
   return {
     ...data,
-    temperature: +data.temperature,
+    engineTemperture: +data.engineTemperture,
     speed: +data.speed,
     latitude: +data.latitude,
     longitude: +data.longitude,
@@ -21,7 +32,7 @@ const formateData = (data)=>{
 export const fetchall = () => dispatch => {
   //get api call
 
-  api.vehicle().fetchall()
+  return api.vehicle().fetchall()
     .then(response => {
       dispatch({
         type: ACTION_TYPES.FETCH_ALL,
@@ -32,7 +43,7 @@ export const fetchall = () => dispatch => {
 }
 
 export const create = (data, onSuccess) => dispatch => {
-  data = formateData(data)
+  data = formatData(data)
   api.vehicle().create(data)
       .then(res => {
           dispatch({
@@ -45,7 +56,7 @@ export const create = (data, onSuccess) => dispatch => {
 }
 
 export const update = (id, data, onSuccess) => dispatch => {
-  data = formateData(data)
+  data = formatData(data)
   api.vehicle().update(id, data)
       .then(res => {
         let updatedAt = new Date().toISOString();

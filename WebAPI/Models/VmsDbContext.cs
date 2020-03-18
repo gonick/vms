@@ -13,7 +13,57 @@ namespace WebAPI.Models
         }
 
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<DriverVehicleMessage> DriverVehicleMessages { get; set; }
 
+
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //creating necessary indexes
+            modelBuilder.Entity<Driver>()
+                .HasIndex(b => b.UserName)
+                .IsUnique()
+                .IncludeProperties(p => new
+                {
+                   p.Password
+                }); 
+
+            modelBuilder.Entity<Vehicle>()
+                .HasIndex(b => b.PlateNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<DriverVehicleMessage>()
+               .HasIndex(p => new { p.DriverId, p.VehicleId, p.CreatedAt });
+
+            modelBuilder.Entity<Driver>()
+                .HasIndex(p => new { p.DrivingLicenseNumber, p.LicenseCountryCode })
+                .IsUnique();
+
+
+            //json property
+            modelBuilder.Entity<Vehicle>()
+                .Property(b => b._connectionDetails).HasColumnName("ConnectionDetails");
+
+
+            //delete behaviour restrict
+            modelBuilder.Entity<DriverVehicleMessage>()
+                .HasOne(u => u.Driver)
+                .WithMany()
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DriverVehicleMessage>()
+              .HasOne(u => u.Vehicle)
+              .WithMany()
+              .IsRequired()
+              .OnDelete(DeleteBehavior.Restrict);
+
+        }
+
+
+        //before saving record in database
+        //set createdAt and updatedAt used in BaseEntity base class of models
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
 
