@@ -18,4 +18,4 @@ Frontend is inside folder react-app. Readme file <a href="https://github.com/gon
 
 # Design Doc
 
-The design document can be found here
+The design document can be found <a href="https://github.com/gonick/vms/blob/master/VMS%20Design.pdf">here</a>
